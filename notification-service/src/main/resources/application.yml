@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: notification-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notificationdb
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # EOS: consumer must use read_committed to only see committed messages
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.bookstore.notificationservice.dto.ShipmentEvent
+        isolation.level: read_committed
+#        ignore headers from the message
+        spring.json.use.type.headers: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+        # EOS: unique transactional id per service instance
+        transactional.id: notification-tx-
+        # idempotent producer is enabled automatically when transactional.id is set
+        enable.idempotence: true
+        acks: all   # wait for all replicas to acknowledge
+
+server:
+  port: 8085

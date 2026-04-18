@@ -1,0 +1,8 @@
+rootProject.name = 'book-kafka'
+
+include 'order-service'
+include 'payment-service'
+
+include 'inventory-service'
+include 'shipping-service'
+include 'notification-service'
